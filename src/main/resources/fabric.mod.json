@@ -6,7 +6,8 @@
 	"description": "Polymer Patch for Blockus",
 	"authors": [
 		"稀神灵梦",
-		"Drex"
+		"Drex",
+		"bluelinden"
 	],
 	"contact": {
 	},
@@ -22,8 +23,8 @@
 		"blockusplus.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.16.0",
-		"minecraft": "~1.21.6",
+		"fabricloader": ">=0.18.0",
+		"minecraft": "~1.21.10",
 		"java": ">=21",
 		"fabric-api": "*",
 		"polymer-core": "*",
