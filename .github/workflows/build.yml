@@ -4,11 +4,17 @@
 # against bad commits.
 
 name: build
-on: [pull_request, push]
+on:
+  push:
+    branches: [master]
+    tags:
+      - "v*"
 
 jobs:
   build:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
@@ -17,14 +23,26 @@ jobs:
       - name: setup jdk
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'microsoft'
+          java-version: "21"
+          distribution: "microsoft"
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew build
-      - name: capture build artifacts
-        uses: actions/upload-artifact@v4
+      - name: Get JAR filename
+        if: startsWith(github.ref, 'refs/tags/')
+        id: jar
+        run: |
+          JAR_FILE=$(ls build/libs/*.jar | grep -v sources | head -n 1)
+          echo "path=$JAR_FILE" >> $GITHUB_OUTPUT
+          echo "name=$(basename $JAR_FILE)" >> $GITHUB_OUTPUT
+      - name: Create Release and Upload JAR
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
         with:
-          name: Artifacts
-          path: build/libs/
+          draft: false
+          prerelease: false
+          body_path: CHANGELOG.md
+          files: ${{ steps.jar.outputs.path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

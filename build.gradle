@@ -19,7 +19,6 @@ repositories {
     // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html
     // for more information about repositories.
-    maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
     maven { url = 'https://maven.nucleoid.xyz' }
     maven { url = "https://api.modrinth.com/maven/" }
     maven {
@@ -38,7 +37,6 @@ repositories {
         name = "Modrinth"
         url = "https://api.modrinth.com/maven"
     }
-    maven { url = "https://api.modrinth.com/maven" }
     maven {
         name "opencollabRepositoryMavenReleases"
         url "https://repo.opencollab.dev/maven-releases"
@@ -86,7 +84,7 @@ dependencies {
     modImplementation include("eu.pb4:factorytools:[${factorytools_version}]")
     modImplementation include("eu.pb4:sgui:[${sgui_version}]")
 
-    modImplementation files('libs/blockus-2.13.1+1.21.8.jar')
+    modImplementation files('libs/blockus-2.14.1+1.21.10.jar')
     modImplementation files('libs/terraform-wood-api-v1-15.0.0-beta.1.jar')
 
     compileOnly 'org.projectlombok:lombok:1.18.34'
