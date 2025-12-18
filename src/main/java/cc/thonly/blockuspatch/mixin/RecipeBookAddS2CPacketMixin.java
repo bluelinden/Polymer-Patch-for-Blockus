@@ -1,13 +1,11 @@
 package cc.thonly.blockuspatch.mixin;
 
 import eu.pb4.polymer.core.api.item.PolymerItemUtils;
-import net.minecraft.item.Item;
 import net.minecraft.network.packet.s2c.play.RecipeBookAddS2CPacket;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeDisplayEntry;
 import net.minecraft.recipe.display.RecipeDisplay;
 import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.registry.entry.RegistryEntry;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -36,16 +34,24 @@ public class RecipeBookAddS2CPacketMixin {
 
     @Inject(method = "<init>(Ljava/util/List;Z)V", at = @At("RETURN"))
     private void removeHighlightForPolymerItems(List<RecipeBookAddS2CPacket.Entry> entries, boolean replace, CallbackInfo ci) {
-        List<RecipeBookAddS2CPacket.Entry> newEntries = new ArrayList<>();
-        for (RecipeBookAddS2CPacket.Entry entry : this.entries) {
+        // Only create a new list if modifications are needed
+        List<RecipeBookAddS2CPacket.Entry> newEntries = null;
+
+        for (int i = 0; i < this.entries.size(); i++) {
+            RecipeBookAddS2CPacket.Entry entry = this.entries.get(i);
             if (entry.isHighlighted() && containsPolymerItem(entry.contents())) {
+                // Lazy initialization of new list only when needed
+                if (newEntries == null) {
+                    newEntries = new ArrayList<>(this.entries);
+                }
                 // Create new entry without the highlighted flag
-                newEntries.add(new RecipeBookAddS2CPacket.Entry(entry.contents(), entry.shouldShowNotification(), false));
-            } else {
-                newEntries.add(entry);
+                newEntries.set(i, new RecipeBookAddS2CPacket.Entry(entry.contents(), entry.shouldShowNotification(), false));
             }
         }
-        this.entries = newEntries;
+
+        if (newEntries != null) {
+            this.entries = newEntries;
+        }
     }
 
     private static boolean containsPolymerItem(RecipeDisplayEntry displayEntry) {
@@ -87,11 +93,11 @@ public class RecipeBookAddS2CPacketMixin {
             case SlotDisplay.WithRemainderSlotDisplay remainder ->
                 slotDisplayContainsPolymerItem(remainder.input()) ||
                 slotDisplayContainsPolymerItem(remainder.remainder());
-            case SlotDisplay.TagSlotDisplay tagDisplay -> {
-                // Check if any item in the tag is a polymer item
-                // We need to iterate over the tag entries if accessible
-                yield false; // Tags typically contain vanilla items
-            }
+            // TagSlotDisplay typically contains vanilla items grouped by tags (e.g., #minecraft:logs).
+            // Polymer items are registered as individual items, not as part of vanilla tags.
+            // Even if a polymer item were added to a tag, the ingredientContainsPolymerItem check
+            // above would catch it via craftingRequirements, so this is safe to return false.
+            case SlotDisplay.TagSlotDisplay tagDisplay -> false;
             default -> false;
         };
     }
