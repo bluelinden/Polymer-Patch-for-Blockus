@@ -8,7 +8,6 @@
     "BlockusItemsMixin",
     "BlockusMixin",
     "BoatItemAccessor",
-    "RecipeBookAddS2CPacketMixin",
     "TerraformBoatItemHelperImplMixin",
     "TerraformSignBlockHelperMixin"
   ],
